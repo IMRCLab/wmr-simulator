@@ -1,8 +1,8 @@
 import numpy as np
-from scripts.controller import Controller
-from scripts.robot import DiffDrive
-from scripts.estimator import DiffDriveEstimator
-from scripts.planner import compute_reference_trajectory
+from controller import Controller
+from robot import DiffDrive
+from estimator import DiffDriveEstimator
+from planner import compute_reference_trajectory
 import argparse
 import yaml
 from visualize import visualize, plot
