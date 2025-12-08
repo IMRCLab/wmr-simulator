@@ -33,6 +33,7 @@ class DiffDrive:
         self.slip_l = float(robot_cfg.get('slip_l', 0.0))
         # Logs
         self.log_states = []
+        self.log_states.append(init_state)
         self.log_vel_omega = []
         self.log_wheel_true = []
         self.log_wheel_meas = []

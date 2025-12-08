@@ -24,7 +24,9 @@ if __name__ == "__main__":
     sim_time = problem["sim_time"]  # simulation duration (s)
     dt = float(problem["time_step"])
     sim_N = int(sim_time / dt)
-    sim_time_grid = np.linspace(0, sim_N * dt, sim_N + 1)
+    sim_time_grid = np.linspace(0, sim_N*dt, sim_N + 1)
+    # print(sim_time_grid)
+    # exit()
     start = problem["start"]
     goal = problem["goal"]
     min_distance_to_goal = problem["controllers"]["mpc"]["min_distance_to_goal"]
@@ -60,6 +62,7 @@ if __name__ == "__main__":
         elif "mpc" in controller_key:
             qto_mpc = QTO_MPC(robot_param=problem) # TODO: fix arguments here
             # mpc_params = controller_item
+            qto_mpc.initiaize_variables()
             controller_objects.append(qto_mpc)
             # # TODO: implement MPC controller initialization
             pass
@@ -70,8 +73,9 @@ if __name__ == "__main__":
             raise ValueError("No valid controller found in problem description.")
 
     # Simulate only for the simulation time horizon for all controllers
-    for controller in controller_objects:    
+    for controller in controller_objects:
         for k in range(len(sim_time_grid)):
+            print("k", k)
             # Update estimator with true wheel speeds
             ur_true, ul_true = robot.get_wheel_speeds()
             pose_true = robot.get_pose()
@@ -91,12 +95,12 @@ if __name__ == "__main__":
             if controller.name == "lyapunov":
                 u = controller.compute(ref_state, pose_est, wheel_est)
             elif controller.name == "mpc":
-                if qto_mpc.goal_reached(pose_true, goal, min_distance_to_goal):
+                if controller.goal_reached(pose_true, goal, min_distance_to_goal):
                     print(40 * "-")
                     print(f"Goal reached at time {k*dt:.2f} seconds.")
                     print(40 * "-")
                     break
-                u = qto_mpc.solve(pose_true, goal)
+                u = controller.solve(pose_true, goal)
             elif controller.name == "realtime_dbA":
                 pass
             else:
@@ -105,5 +109,6 @@ if __name__ == "__main__":
             robot.step(u)
             
         # Plot results for this controller
+        print(len(reference_states), len(sim_time_grid), sim_N)
         plot(robot, estimator, reference_states, sim_time_grid, out_prefix=args.output+"_"+controller.name)
         visualize(problem_path, robot, reference_states, out_prefix=args.output+"_"+controller.name)

@@ -1,32 +1,47 @@
-sim_time: 10.0 # seconds
+sim_time: 4.0 # seconds
 time_step: 0.1 # seconds
 environment:
   min: [-5, -5]
   max: [5, 5]
   obstacles: []
+  output:
+    - name: "trajectory"
+      type: "array"
+      params:
+        - name: "x"
+          type: "float"
+          size: 100
+        - name: "y"
+          type: "float"
+          size: 1000
+        - name: "theta"
+          type: "float"
+          size: 100
+    - name: "total_time"
+      type: "float"
 start: [0.0, 0.0, 0.0]
-goal:  [1.0, 1.0, 1.57]
+goal:  [1.0, 1.0, 1.0]
 planner: 
   waypoints: []
     # - [0.5,0.0]
     # - [1.0,0.5]
-  time: 10.0 # seconds
+  time: 4.0 # seconds
 
 controllers:
   # lyapunov:
   #   gains: [5.0, 5.0, 3.0, 0.4, 0.4, 0.2, 0.2] # [kx, ky, kth, kprmotor, kplmotor, kirmotor, kilmotor]
   mpc:
-    min_distance_to_goal: 2.0
-    horizon: 20
+    min_distance_to_goal: 0.0
+  # realtimedbA:
 
 robotcfg: 
   type: differential_drive
   wheel_radius: 0.015  # m
   base_diameter: 0.089  # m
   max_vel_leftwheel: 157.08 # rad/s
-  min_vel_leftwheel: 15 # rad/s
-  max_vel_rightwheel: 77.08 # rad/s
-  min_vel_rightwheel: 15 # rad/s
+  min_vel_leftwheel: 0.0 # rad/s //15
+  max_vel_rightwheel: 77.08 # rad/s //77.08
+  min_vel_rightwheel: 0.0 # rad/s  //15
   time_constant:  0.0  # time constant for first-order wheel dynamics (set to 0 for ideal actuation)
   slip_r: 0.0          # std of fractional slip on ur (40%) [0 -> 1.0]
   slip_l: 0.0          # std of fractional slip on ul (50%) [0 -> 1.0]

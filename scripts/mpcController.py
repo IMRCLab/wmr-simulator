@@ -10,8 +10,6 @@ class QTO_MPC():
     """Quasi Time-Optimal Model Predictive Control (QTO-MPC) class."""
     
     def __init__(self, robot_param):
-        environment = robot_param["environment"]
-        cmd_limits = [robot_param["robotcfg"]["min_vel_leftwheel"], robot_param["robotcfg"]["max_vel_leftwheel"], robot_param["robotcfg"]["min_vel_rightwheel"], robot_param["robotcfg"]["max_vel_rightwheel"]]
         dt = robot_param["time_step"]
         # MPC parameters
         self.N = 20     # Prediction horizon
@@ -24,16 +22,16 @@ class QTO_MPC():
         self.distance_between_wheels = robot_param["robotcfg"]["base_diameter"] 
 
         # State limits
-        x_min = [environment["min"][0], environment["min"][1], -ca.inf]
-        x_max = [environment["max"][0], environment["max"][1], ca.inf]
+        x_min = [robot_param["environment"]["min"][0], robot_param["environment"]["min"][1], -ca.inf]
+        x_max = [robot_param["environment"]["max"][0], robot_param["environment"]["max"][1], ca.inf]
 
         # Control limits
-        self.cmd_limits = cmd_limits
-        umin_right, umax_right, umin_left, umax_left = self.cmd_limits
+        # self.cmd_limits = cmd_limits
+        # umin_right, umax_right, umin_left, umax_left = self.cmd_limits
 
-        u_min = [umin_right, umin_left]
-        u_max = [umax_right, umax_left]
-        
+        u_min = [robot_param["robotcfg"]["min_vel_leftwheel"], robot_param["robotcfg"]["min_vel_rightwheel"]]
+        u_max = [robot_param["robotcfg"]["max_vel_leftwheel"], robot_param["robotcfg"]["max_vel_rightwheel"]]
+
         # Cost function weights
         Q = ca.diag([10.0, 10.0, 0.1])
         QN = ca.diag([10.0, 10.0, 0.1])
@@ -134,8 +132,7 @@ class QTO_MPC():
         x_next = ca.vertcat(
             x[0] + v * ca.cos(x[2]) * dt,
             x[1] + v * ca.sin(x[2]) * dt,
-            x[2] + omega * dt
-        )
+            ca.fmod(x[2] + omega*dt + ca.pi, 2*ca.pi) - ca.pi)
         return x_next
     
     def initiaize_variables(self):
@@ -176,7 +173,7 @@ class QTO_MPC():
 # wheel_radius = self.wheel_radius
 # distance_between_wheels = robot_param["robotcfg"]["base_diameter"]
 
-def simulator(x, u, dt=0.01):
+def simulator(x, u, dt):
     v_left, v_right = u[0], u[1]
     v = wheel_radius * (v_left + v_right) / 2.0
     omega = wheel_radius * (v_right - v_left) / distance_between_wheels
@@ -190,9 +187,9 @@ def simulator(x, u, dt=0.01):
     )
     return x_next
 
-def goal_reached(x, goal, min_dist):
-    dist = np.linalg.norm(np.array(x[:2]) - np.array(goal[:2])) + np.abs(x[2] - goal[2])
-    return dist < min_dist
+# def goal_reached(x, goal, min_dist):
+#     dist = np.linalg.norm(np.array(x[:2]) - np.array(goal[:2])) + np.abs(x[2] - goal[2])
+#     return dist < min_dist
 
 # qto_mpc = QTO_MPC(config)
 # # Run simulation

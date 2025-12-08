@@ -104,11 +104,16 @@ def plot(robot, estimator, reference_states, time, out_prefix="plot_trajectory")
     # Trim / extend to match states length if needed
     states = np.array(robot.log_states)
     time = np.array(time)
+    # print("WASSSSAAAAAAAAA33333333333 ---------------------------------")
+    # print(len(states), len(time))
+    # exit()
+
     if len(time) < len(states):
         print("Extending time vector to match states length.")
         last_time = time[-1]
         dt = time[1] - time[0] if len(time) > 1 else 0.01
-        extra_times = np.arange(last_time + dt, last_time + dt * (len(states) - len(time) + 1), dt)
+        extra_times = np.arange(last_time, last_time + dt * (len(states) - len(time)), dt)
+        print(extra_times)
         time = np.concatenate((time, extra_times))
     elif len(time) > len(states):
         print("Trimming time vector to match states length.")
@@ -116,7 +121,13 @@ def plot(robot, estimator, reference_states, time, out_prefix="plot_trajectory")
     N = len(states)
     est_pose_hat = est_pose_hat[:N]
     est_pose_meas = est_pose_meas[:N]
+    # print("WASSSSAAAAAAAAA33333333333 ---------------------------------")
+    # print(len(states), len(time))
+    # exit()
 
+
+    print("WASSSSAAAAAAAAA33333333333 ---------------------------------")
+    print(len(states), len(time), len(reference_states))
 
     # Extend reference states if needed to match time length
     if len(time) > len(reference_states):
@@ -126,9 +137,11 @@ def plot(robot, estimator, reference_states, time, out_prefix="plot_trajectory")
             reference_states,
             np.tile(last_ref_state, (num_extra_steps, 1))
         ])
+        print("extended", len(extended_ref_states))
+        # exit()
     else:
         extended_ref_states = reference_states[:len(time)]
-    
+
     ref_pos = extended_ref_states[:, 0:2]   # x, y
     ref_th = extended_ref_states[:, 2]      # theta
     ref_vel = extended_ref_states[:, 3:5]   # vx, vy
@@ -172,14 +185,14 @@ def plot(robot, estimator, reference_states, time, out_prefix="plot_trajectory")
         # ----------------------------------------
         fig2, axes2 = plt.subplots(2, 1, figsize=(10, 6))
 
-        axes2[0].plot(time, wheel_inputs_cmd[:, 0], 'g-', label='Commanded Right Wheel')
-        axes2[0].plot(time, wheel_inputs_true[:, 0], 'g--', label='True Right Wheel')
+        axes2[0].plot(time[0:len(time)-1], wheel_inputs_cmd[:, 0], 'g-', label='Commanded Right Wheel')
+        axes2[0].plot(time[0:len(time)-1], wheel_inputs_true[:, 0], 'g--', label='True Right Wheel')
         axes2[0].set_ylabel('Right Wheel Speed [rad/s]')
         axes2[0].legend()
         axes2[0].grid(True)
 
-        axes2[1].plot(time, wheel_inputs_cmd[:, 1], 'm-', label='Commanded Left Wheel')
-        axes2[1].plot(time, wheel_inputs_true[:, 1], 'm--', label='True Left Wheel')
+        axes2[1].plot(time[0:len(time)-1], wheel_inputs_cmd[:, 1], 'm-', label='Commanded Left Wheel')
+        axes2[1].plot(time[0:len(time)-1], wheel_inputs_true[:, 1], 'm--', label='True Left Wheel')
         axes2[1].set_ylabel('Left Wheel Speed [rad/s]')
         axes2[1].set_xlabel('Time Step')
         axes2[1].legend()
