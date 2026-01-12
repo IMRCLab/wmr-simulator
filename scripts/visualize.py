@@ -104,16 +104,12 @@ def plot(robot, estimator, reference_states, time, out_prefix="plot_trajectory")
     # Trim / extend to match states length if needed
     states = np.array(robot.log_states)
     time = np.array(time)
-    # print("WASSSSAAAAAAAAA33333333333 ---------------------------------")
-    # print(len(states), len(time))
-    # exit()
 
     if len(time) < len(states):
         print("Extending time vector to match states length.")
         last_time = time[-1]
         dt = time[1] - time[0] if len(time) > 1 else 0.01
         extra_times = np.arange(last_time, last_time + dt * (len(states) - len(time)), dt)
-        print(extra_times)
         time = np.concatenate((time, extra_times))
     elif len(time) > len(states):
         print("Trimming time vector to match states length.")
@@ -121,13 +117,7 @@ def plot(robot, estimator, reference_states, time, out_prefix="plot_trajectory")
     N = len(states)
     est_pose_hat = est_pose_hat[:N]
     est_pose_meas = est_pose_meas[:N]
-    # print("WASSSSAAAAAAAAA33333333333 ---------------------------------")
-    # print(len(states), len(time))
-    # exit()
 
-
-    print("WASSSSAAAAAAAAA33333333333 ---------------------------------")
-    print(len(states), len(time), len(reference_states))
 
     # Extend reference states if needed to match time length
     if len(time) > len(reference_states):
@@ -137,7 +127,6 @@ def plot(robot, estimator, reference_states, time, out_prefix="plot_trajectory")
             reference_states,
             np.tile(last_ref_state, (num_extra_steps, 1))
         ])
-        print("extended", len(extended_ref_states))
         # exit()
     else:
         extended_ref_states = reference_states[:len(time)]
@@ -169,8 +158,6 @@ def plot(robot, estimator, reference_states, time, out_prefix="plot_trajectory")
 
         for k in range(3):
             axes1[k].plot(time, states[:, k], 'b-', label=f'Actual {labels[k]}')
-            axes1[k].plot(time, refstates[:, k], 'r--', label=f'Ref {labels[k]}')
-            axes1[k].plot(time[:N], est_pose_hat[:, k], 'g-.', label=f'Est {labels[k]}')
             axes1[k].set_ylabel(f'{["X Position", "Y Position", "Angle"][k]}')
             axes1[k].legend()
             axes1[k].grid(True)
@@ -213,7 +200,6 @@ def plot(robot, estimator, reference_states, time, out_prefix="plot_trajectory")
         v_reference = np.sqrt(ref_vel[:, 0]**2 + ref_vel[:, 1]**2)[:len(v_ctrl)]  # magnitude of reference velocity
         
         axes3[0].plot(time[:len(v_ctrl)], v_ctrl, 'b-', label='Controller Linear Velocity')
-        axes3[0].plot(time[:len(v_reference)], v_reference, 'r--', label='Reference Linear Velocity')
         axes3[0].set_ylabel('Linear Velocity [m/s]')
         axes3[0].legend()
         axes3[0].grid(True)
@@ -223,7 +209,6 @@ def plot(robot, estimator, reference_states, time, out_prefix="plot_trajectory")
         w_reference = ref_omega[:len(w_ctrl)]
         
         axes3[1].plot(time[:len(w_ctrl)], w_ctrl, 'b-', label='Controller Angular Velocity')
-        axes3[1].plot(time[:len(w_reference)], w_reference, 'r--', label='Reference Angular Velocity')
         axes3[1].set_ylabel('Angular Velocity [rad/s]')
         axes3[1].set_xlabel('Time [s]')
         axes3[1].legend()

@@ -13,26 +13,28 @@ environment:
           size: 100
         - name: "y"
           type: "float"
-          size: 1000
+          size: 100
         - name: "theta"
           type: "float"
           size: 100
     - name: "total_time"
       type: "float"
 start: [0.0, 0.0, 0.0]
-goal:  [1.0, 1.0, 1.0]
+goal:  [1.0, 1.0, 0.0]
 planner: 
   waypoints: []
     # - [0.5,0.0]
     # - [1.0,0.5]
   time: 4.0 # seconds
 
+min_distance_to_goal: 0.0
 controllers:
   # lyapunov:
   #   gains: [5.0, 5.0, 3.0, 0.4, 0.4, 0.2, 0.2] # [kx, ky, kth, kprmotor, kplmotor, kirmotor, kilmotor]
   mpc:
-    min_distance_to_goal: 0.0
+    
   # realtimedbA:
+
 
 robotcfg: 
   type: differential_drive

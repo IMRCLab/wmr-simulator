@@ -6,6 +6,7 @@ from estimator import DiffDriveEstimator
 from planner import compute_reference_trajectory
 import argparse
 import yaml
+import subprocess
 from visualize import visualize, plot
 
 ##### KHALED WAHBA AUTHOR
@@ -29,7 +30,7 @@ if __name__ == "__main__":
     # exit()
     start = problem["start"]
     goal = problem["goal"]
-    min_distance_to_goal = problem["controllers"]["mpc"]["min_distance_to_goal"]
+    min_distance_to_goal = problem["min_distance_to_goal"]
 
     # Initialize robot and estimator
     robot_cfg = problem["robotcfg"]
@@ -66,12 +67,23 @@ if __name__ == "__main__":
             controller_objects.append(qto_mpc)
             # # TODO: implement MPC controller initialization
             pass
-        elif "realtime_dbA" in controller_key:
-            #TODO: implement realtime dBA controller initialization
+        elif "realtimedbA" in controller_key:
             pass
+            # exit()
+            #TODO: implement realtime dBA controller initialization
         else:
             raise ValueError("No valid controller found in problem description.")
 
+    if controller_key == "realtimedbA":
+        rust_project_dir = "../../realtime-dbastar/smag"
+        # args = ["cargo", "run", "--", 0.0, 1.0, 2.0, 1.0, 1.0, 1.0, 1.0]
+
+        # args = ["cargo", "run", "--", start[0], start[1], start[2], goal[0], goal[1], goal[2], min_distance_to_goal]
+        args = ["cargo","run", "--",str(start[0]), str(start[1]),str(start[2]), str(goal[0]), str(goal[1]),str(goal[2]), 
+        str(robot_cfg["min_vel_leftwheel"]), str(robot_cfg["min_vel_rightwheel"]), str(robot_cfg["max_vel_leftwheel"]),str(robot_cfg["max_vel_rightwheel"])]
+        # args = "cargo run -- 0.0 0.0 0.0 1.0 1.0 0.0"
+        result = subprocess.run(args, cwd=rust_project_dir, capture_output=True, text=True)
+        # result = subprocess.run(args, shell=True, cwd=rust_project_dir, capture_output=True, text=True)
     # Simulate only for the simulation time horizon for all controllers
     for controller in controller_objects:
         for k in range(len(sim_time_grid)):
@@ -102,6 +114,7 @@ if __name__ == "__main__":
                     break
                 u = controller.solve(pose_true, goal)
             elif controller.name == "realtime_dbA":
+                # u =
                 pass
             else:
                 raise ValueError("Unknown controller type during simulation.")
@@ -109,6 +122,5 @@ if __name__ == "__main__":
             robot.step(u)
             
         # Plot results for this controller
-        print(len(reference_states), len(sim_time_grid), sim_N)
         plot(robot, estimator, reference_states, sim_time_grid, out_prefix=args.output+"_"+controller.name)
         visualize(problem_path, robot, reference_states, out_prefix=args.output+"_"+controller.name)
