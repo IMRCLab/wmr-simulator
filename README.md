@@ -18,44 +18,68 @@ This README explains:
 The simulator is driven by a YAML file such as **`empty.yaml`**.
 
 ```yaml
-sim_time: 5.0
-time_step: 0.01
-
+sim_time: 4.0 # seconds
+time_step: 0.1 # seconds
 environment:
   min: [-5, -5]
   max: [5, 5]
   obstacles: []
-
+  output:
+    - name: "trajectory"
+      type: "array"
+      params:
+        - name: "x"
+          type: "float"
+          size: 100
+        - name: "y"
+          type: "float"
+          size: 100
+        - name: "theta"
+          type: "float"
+          size: 100
+    - name: "total_time"
+      type: "float"
 start: [0.0, 0.0, 0.0]
-goal:  [2.0, 1.0, 1.57]
+goal:  [1.0, 1.0, 0.0]
+planner: 
+  waypoints: []
+    # - [0.5,0.0]
+    # - [1.0,0.5]
+  time: 4.0 # seconds
 
-planner:
-  waypoints:
-    - [0.5, 0.0, -1.57]
-    - [1.0, 0.5,  1.57]
-  time: 4.0
+min_distance_to_goal: 0.0
+controllers:
+  # lyapunov:
+  #   gains: [5.0, 5.0, 3.0, 0.4, 0.4, 0.2, 0.2] # [kx, ky, kth, kprmotor, kplmotor, kirmotor, kilmotor]
+  mpc:
+    
+  # realtimedbA:
 
-controller:
-  gains: [5.0, 5.0, 3.0, 0.4, 0.4, 0.2, 0.2]
 
-robot:
-  wheel_radius: 0.016
-  base_diameter: 0.089
-  max_wheel_speed: 40.0
-  slip_r: 0.4
-  slip_l: 0.5
+robotcfg: 
+  type: differential_drive
+  wheel_radius: 0.015  # m
+  base_diameter: 0.089  # m
+  max_vel_leftwheel: 157.08 # rad/s
+  min_vel_leftwheel: 0.0 # rad/s //15
+  max_vel_rightwheel: 77.08 # rad/s //77.08
+  min_vel_rightwheel: 0.0 # rad/s  //15
+  time_constant:  0.0  # time constant for first-order wheel dynamics (set to 0 for ideal actuation)
+  slip_r: 0.0          # std of fractional slip on ur (40%) [0 -> 1.0]
+  slip_l: 0.0          # std of fractional slip on ul (50%) [0 -> 1.0]
 
 estimator:
-  type: "kf"
-  wheel_radius: 0.015
-  base_diameter: 0.09
-  noise_pos: 0.0001
-  noise_angle: 0.07
-  enc_angle_noise: 0.01
-  proc_pos_std: 0.7
-  proc_theta_std: 0.7
-  start: [0.0, 0.0, 0.0]
-```
+  type: "dr"              # estimator type: "kf" (Kalman Filter) or "dr" (Dead Reckoning)
+  wheel_radius: 0.015     # estimator's wheel_radius [m]
+  base_diameter: 0.089      # estimator's base_diameter [m]
+  noise_pos: 0.0       # position measurement noise [m] (from mocap almost no noise)  
+  noise_angle: 0.0       # orientation noise [rad] ~  4 degrees
+  enc_angle_noise: 0.0   # encoder noise   
+  proc_pos_std: 0.0       # [m]   process noise on x,y per step
+  proc_theta_std: 0.0    # [rad] process noise on θ per step
+
+  start: [0.0, 0.0, 0.0]  # initial pose estimate
+  ```
 
 ### YAML → Subsystems
 
@@ -547,5 +571,4 @@ Subsystems:
 5. Robot  
    - slip  
    - differential-drive kinematics  
-6. Visualization and logging  
-
+6. Visualization and logging
